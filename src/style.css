@@ -1,0 +1,284 @@
+:root {
+  color-scheme: light;
+  --bg: #eef1f6;
+  --panel: #ffffff;
+  --ink: #1f2937;
+  --muted: #6b7280;
+  --line: #d5dbe5;
+  --accent: #2767ae;
+  --accent-soft: #e8f0fa;
+  --warn: #b45309;
+  --error: #b91c1c;
+  font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-size: 14px; }
+
+.app-shell { display: flex; flex-direction: column; height: 100vh; }
+
+.topbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line);
+}
+.brand { font-weight: 700; letter-spacing: .02em; display: flex; align-items: center; gap: 8px; }
+.brand-mark {
+  width: 18px; height: 18px; border-radius: 5px;
+  background: linear-gradient(135deg, #4b9fe1, #2767ae);
+}
+.project-name {
+  width: 190px; padding: 6px 10px; border: 1px solid var(--line);
+  border-radius: 7px; font: inherit; color: inherit;
+}
+.spacer { flex: 1; }
+/* 作者表記。主張しすぎず、帰り道にもなる。 */
+.author { font-size: 12px; color: var(--muted); text-decoration: none; padding: 0 4px; }
+.author:hover { color: var(--accent); text-decoration: underline; }
+
+.btn {
+  padding: 6px 12px; border: 1px solid var(--line); border-radius: 7px;
+  background: #fff; color: var(--ink); font: inherit; cursor: pointer;
+}
+.btn:hover { background: #f3f6fb; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { background: #1f5691; }
+.btn.icon { padding: 6px 9px; }
+.btn-icon { width: 16px; height: 16px; display: block; flex: none; }
+.btn.primary { display: inline-flex; align-items: center; gap: 6px; }
+/* 作業データの保存と、成果物の書き出しは種類が違うので区切る。 */
+.divider { width: 1px; align-self: stretch; background: var(--line); margin: 1px 6px; }
+
+/* --- 書き出しのドロップダウン --- */
+.menu { position: relative; display: inline-flex; }
+.caret {
+  width: 0; height: 0; margin-left: 2px;
+  border-left: 4px solid transparent; border-right: 4px solid transparent;
+  border-top: 5px solid currentColor; opacity: .85;
+}
+.menu-panel {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 60;
+  min-width: 304px; padding: 6px;
+  background: #fff; border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(16, 24, 40, .16);
+}
+.menu-item {
+  display: flex; align-items: flex-start; gap: 10px; width: 100%;
+  padding: 9px 10px; border: 0; border-radius: 7px;
+  background: none; font: inherit; text-align: left; cursor: pointer;
+}
+.menu-item:hover { background: #f1f5fb; }
+.menu-item strong { display: block; font-size: 13px; font-weight: 600; color: var(--ink); }
+.menu-item small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+.menu-item .chip { margin: 4px 0 0; }
+.chip.blank { background: transparent; }
+.menu-sep { height: 1px; background: var(--line); margin: 5px 8px; }
+/* 種類の見出し。STLとSVGは用途が違うので分けて示す。 */
+.menu-heading {
+  font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .06em;
+  padding: 8px 10px 5px; border-top: 1px solid var(--line); margin-top: 5px;
+}
+.menu-heading:first-child { border-top: none; margin-top: 0; padding-top: 5px; }
+
+/* --- 使う前の注意 --- */
+.btn.notice { display: inline-flex; align-items: center; gap: 5px; color: #b45309; border-color: #f3d9a8; background: #fffaf0; }
+.btn.notice:hover { background: #fdf0d8; border-color: #e6bf78; }
+
+.notice-dialog {
+  max-width: 620px; width: calc(100% - 40px); border: 0; border-radius: 14px;
+  padding: 0; box-shadow: 0 24px 60px rgba(16, 24, 40, .26); color: var(--ink);
+}
+.notice-dialog::backdrop { background: rgba(17, 24, 39, .45); }
+.notice-dialog article { padding: 26px 28px 20px; max-height: 80vh; overflow: auto; }
+.notice-dialog h2 { margin: 0 0 4px; font-size: 19px; }
+.notice-dialog h3 {
+  margin: 20px 0 6px; font-size: 14px; color: var(--accent);
+  border-left: 3px solid var(--accent); padding-left: 8px;
+}
+.notice-dialog p { margin: 0 0 8px; font-size: 13.5px; line-height: 1.75; }
+.notice-dialog ul { margin: 0 0 8px; padding-left: 20px; font-size: 13.5px; line-height: 1.75; }
+.notice-dialog strong { font-weight: 700; }
+/* 一番伝えたい一文 */
+.notice-dialog .strong-note {
+  background: #fffaf0; border: 1px solid #f3d9a8; border-radius: 8px;
+  padding: 10px 12px; font-weight: 600; color: #92400e;
+}
+.notice-dialog .disclaimer { color: var(--muted); font-size: 12.5px; line-height: 1.7; }
+.notice-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
+
+.workspace { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; min-height: 0; }
+.pane { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.pane-head { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.pane-title { font-weight: 600; font-size: 13px; }
+
+/* --- レイヤー（最上位のモード）--- */
+/* 道具のタブと同じ見た目だと階層が分からないので、はっきり大きく・色付きにする。 */
+.layer-head { padding: 10px 12px 9px; gap: 8px; }
+.layer-tabs { display: flex; align-items: center; gap: 6px; }
+.layer-tab {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 15px 8px 11px; border-radius: 9px;
+  border: 1.5px solid var(--line); background: #fff;
+  font: inherit; font-size: 14px; font-weight: 600; color: #6b7280;
+  cursor: pointer; transition: background .12s, border-color .12s, color .12s;
+}
+.layer-tab svg { width: 20px; height: 20px; display: block; flex: none; color: #9aa4b2; }
+.layer-tab:hover { border-color: var(--layer); color: var(--ink); }
+.layer-tab:hover svg { color: var(--layer); }
+.layer-tab.active {
+  background: var(--layer); border-color: var(--layer); color: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .18);
+}
+.layer-tab.active svg { color: #fff; }
+/* 下絵は設計そのものではなく補助なので、区切って置く。 */
+.layer-divider { width: 1px; align-self: stretch; background: var(--line); margin: 2px 5px; }
+
+/* レイヤーの説明。左端に現在の色の帯を出して、タブとの対応を示す。 */
+.tool-head { padding: 7px 12px; gap: 10px; background: #fafbfd; }
+.layer-purpose {
+  font-size: 12px; color: var(--muted);
+  border-left: 3px solid var(--layer, var(--line)); padding-left: 8px;
+}
+
+.tool-tabs { display: flex; gap: 4px; }
+.tool {
+  padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; font: inherit; font-size: 13px; cursor: pointer;
+}
+.tool.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+.canvas-wrap { position: relative; flex: 1; min-height: 0; }
+#editor-svg { width: 100%; height: 100%; display: block; touch-action: none; background: #fbfcfe; }
+.canvas-help {
+  position: absolute; left: 10px; bottom: 8px; margin: 0;
+  font-size: 11px; color: var(--muted); background: rgba(255,255,255,.86);
+  padding: 3px 8px; border-radius: 6px; pointer-events: none;
+}
+
+.preview-stage { position: relative; flex: 1; min-height: 0; }
+#preview3d { width: 100%; height: 100%; }
+.axis-label {
+  position: absolute; right: 10px; bottom: 8px; font-size: 11px; color: var(--muted);
+  background: rgba(255,255,255,.86); padding: 3px 8px; border-radius: 6px; pointer-events: none;
+}
+
+.properties {
+  border-top: 1px solid var(--line); padding: 10px 12px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 8px 10px;
+  max-height: 42%; overflow: auto;
+}
+.field { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
+.field input, .field select {
+  padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px;
+  font: inherit; font-size: 13px; color: var(--ink); background: #fff;
+}
+.field.full { grid-column: 1 / -1; }
+.group-title {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 7px;
+  font-size: 12px; font-weight: 700; color: #4b5563;
+  margin-top: 6px; border-top: 1px solid var(--line); padding-top: 10px;
+}
+/* 部品ごとのグループには、3Dでの色と同じ印を付ける。 */
+.group-title::before {
+  content: ''; width: 9px; height: 9px; border-radius: 3px; flex: none;
+  background: var(--group, #c3cbd6);
+}
+.group-title:first-child { margin-top: 0; border-top: none; padding-top: 0; }
+
+/* 色の対応を示す小さな丸 */
+.chip {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--c);
+  display: inline-block; margin-right: 6px; vertical-align: -1px;
+}
+.head-label { font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+.check { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.check.full { grid-column: 1 / -1; }
+
+.issues { border-top: 1px solid var(--line); padding: 8px 12px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; }
+.issue { display: flex; gap: 6px; align-items: baseline; }
+.issue.error { color: var(--error); }
+.issue.warn { color: var(--warn); }
+.issue.ok { color: #15803d; }
+
+.status {
+  padding: 7px 16px; background: var(--panel); border-top: 1px solid var(--line);
+  font-size: 12px; color: var(--muted); min-height: 30px;
+}
+.status.error { color: var(--error); }
+
+.inspector {
+  border-top: 1px solid var(--line); padding: 8px 12px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-height: 42px;
+}
+.inspector-label { font-size: 12px; color: var(--muted); }
+
+/* 形そのものを見せるアイコン付きのトグル */
+.tool.icon-tool { display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px 4px 9px; }
+/* 小さいと曲線と直線の差が潰れるので、少し大きめに出す。 */
+.node-icon { width: 22px; height: 22px; display: block; color: #7c8798; flex: none; }
+.tool.icon-tool.active .node-icon { color: var(--accent); }
+.tool.icon-tool:hover .node-icon { color: var(--ink); }
+
+/* --- 道具のタブ --- */
+#tool-tabs .tool.icon-tool > svg { width: 18px; height: 18px; display: block; flex: none; color: #8c96a5; }
+#tool-tabs .tool:hover > svg { color: var(--ink); }
+/* 選択中の道具はそのレイヤーの色にして、モードとの結びつきを示す。 */
+#tool-tabs .tool.active {
+  background: var(--layer-soft); border-color: var(--layer); color: var(--layer);
+}
+#tool-tabs .tool.active > svg { color: var(--layer); }
+/* 「描く」道具は新しく何かを作る操作なので、選択より一段目立たせる。 */
+#tool-tabs .tool.creates { font-weight: 600; }
+#tool-tabs .tool.creates > svg { color: var(--layer); opacity: .7; }
+#tool-tabs .tool.creates:hover { border-color: var(--layer); background: var(--layer-soft); }
+#tool-tabs .tool.creates:hover > svg,
+#tool-tabs .tool.creates.active > svg { opacity: 1; }
+.field.inline { flex-direction: row; align-items: center; gap: 6px; }
+.field.inline input { width: 86px; }
+
+/* 2Dキャンバスの描画要素 */
+.grid-line { stroke: #e6ebf3; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.grid-axis { stroke: #cfd8e6; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.outline-shape { fill: rgba(39,103,174,.10); stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.outline-shape.dim { fill: rgba(39,103,174,.05); stroke: #a8bfd8; stroke-width: 1.5; }
+
+.detail-stroke { fill: none; stroke: #c2508a; stroke-linecap: round; stroke-linejoin: round; opacity: .85; cursor: move; }
+.detail-stroke.dim { opacity: .3; cursor: default; }
+.detail-stroke.selected { stroke: #8f1f5c; opacity: 1; }
+.detail-region { fill: rgba(194,80,138,.45); stroke: #c2508a; stroke-width: 1.5; vector-effect: non-scaling-stroke; cursor: move; }
+.detail-region.dim { fill: rgba(194,80,138,.16); stroke: #d99bbb; cursor: default; }
+.detail-region.selected { fill: rgba(143,31,92,.55); stroke: #8f1f5c; }
+
+.sketch {
+  fill: rgba(194,80,138,.16); stroke: #8f1f5c; stroke-width: 1.5;
+  stroke-dasharray: 5 4; vector-effect: non-scaling-stroke;
+}
+.sketch-dot { fill: #8f1f5c; }
+
+/* 幅が足りないときは2ペインを縦に積む。横並びのままだと両方とも使えなくなる。 */
+@media (max-width: 940px) {
+  .workspace { grid-template-columns: 1fr; grid-auto-rows: minmax(360px, 1fr); }
+  .brand-text { display: none; }
+  .project-name { width: 130px; }
+  .properties { max-height: none; }
+}
+.handle-line { stroke: #9db7d4; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.node { fill: #fff; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; pointer-events: none; }
+.node.selected { fill: var(--accent); }
+.handle { fill: #7aa7d8; stroke: #fff; stroke-width: 1.5; vector-effect: non-scaling-stroke; pointer-events: none; }
+/* 見た目には出さず、掴める範囲だけを広げるための当たり判定。 */
+.hit { fill: transparent; cursor: grab; }
+.hit:active { cursor: grabbing; }
+
+/* 要注意箇所の印 */
+.problem { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; pointer-events: none; }
+.problem.sharp { stroke: #d97706; }
+.problem.tight { stroke: #dc2626; stroke-dasharray: 4 3; }
+
+/* 下絵 */
+.underlay { pointer-events: none; }
+.underlay.editable { pointer-events: auto; cursor: move; }
+.underlay-frame {
+  fill: none; stroke: #7c3aed; stroke-width: 1.5;
+  stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; pointer-events: none;
+}
+.underlay-grip { fill: #7c3aed; stroke: #fff; stroke-width: 1.5; vector-effect: non-scaling-stroke; cursor: nwse-resize; }
