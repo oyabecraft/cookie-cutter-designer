@@ -274,6 +274,7 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-size: 14px; }
   fill: rgba(194,80,138,.16); stroke: #8f1f5c; stroke-width: 1.5;
   stroke-dasharray: 5 4; vector-effect: non-scaling-stroke;
 }
+.sketch.open { fill: none; }
 .sketch-dot { fill: #8f1f5c; }
 
 /* 幅が足りないときは2ペインを縦に積む。横並びのままだと両方とも使えなくなる。 */

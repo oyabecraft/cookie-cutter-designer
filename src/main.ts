@@ -517,7 +517,10 @@ function drawEditor() {
   // 描きかけ
   if (sketch && sketch.points.length) {
     const d = sketch.points.map((p, i) => `${i ? 'L' : 'M'} ${p.x} ${p.y}`).join(' ')
-    svg.append(el('path', { d: sketch.kind === 'region' ? d + ' Z' : d, class: 'sketch' }))
+    // 線のときは塗らない。開いたパスでも SVG は始点と終点を結んで塗るので、
+    // 描いている最中に面があるように見えてしまう。
+    const closed = sketch.kind === 'region'
+    svg.append(el('path', { d: closed ? d + ' Z' : d, class: closed ? 'sketch' : 'sketch open' }))
     for (const point of sketch.points) {
       svg.append(el('circle', { cx: point.x, cy: point.y, r: box.w / 220, class: 'sketch-dot' }))
     }
