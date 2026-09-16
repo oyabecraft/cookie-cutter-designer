@@ -2,7 +2,7 @@
 
 クッキーの**抜き型**と**スタンプ**を、ブラウザで設計して3Dプリンタ用のSTLに書き出せるツールです。
 
-**→ https://tools.oyabe-craft.com/cookie-cutter/**
+**→ https://oyabecraft.github.io/cookie-cutter-designer/**
 
 作者: [オヤベクラフト](https://oyabe-craft.com/)
 
