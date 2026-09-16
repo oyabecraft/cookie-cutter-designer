@@ -22,9 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # バージョンは package.json の packageManager に従う。
+      # ここで version を指定すると二重指定でエラーになる。
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - uses: actions/setup-node@v4
         with:
