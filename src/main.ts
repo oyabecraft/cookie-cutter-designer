@@ -19,6 +19,10 @@ import type { Design, Detail, Issue, Layer, Mesh, Node2D, Path, Underlay, Vec2 }
 
 const STORAGE_KEY = 'cookie-cutter-designer-v1'
 
+/** マウスのボタン番号。ホイールクリックは道具に関係なく画面移動に使う。 */
+const LEFT_BUTTON = 0
+const MIDDLE_BUTTON = 1
+
 /**
  * 画面上の大きさ(px)で決める。ズームしても掴みやすさが変わらないようにするため。
  * 見た目の丸は小さく、掴める範囲は広く。4px程度だと狙うのが苦しい。
@@ -77,6 +81,14 @@ app.innerHTML = `
         </div>
         <div class="canvas-wrap">
           <svg id="editor-svg"></svg>
+          <button class="dropzone" id="dropzone" hidden>
+            <svg viewBox="0 0 48 48" aria-hidden="true">
+              <path d="M24 32V10M15 19l9-9 9 9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 30v6a2 2 0 0 0 2 2h28a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <strong>画像をここにドロップ</strong>
+            <span>クリックしてファイルを選ぶこともできます</span>
+          </button>
           <p class="canvas-help" id="canvas-help"></p>
         </div>
         <div class="inspector" id="inspector"></div>
@@ -567,6 +579,8 @@ function drawEditor() {
 
 function startDrag(event: PointerEvent, nodeId: string, part: 'node' | 'in' | 'out') {
   if (sketch) return
+  // 左ボタン以外は掴まない。ホイールクリックは svg 側で画面移動として扱う。
+  if (event.button !== LEFT_BUTTON) return
   event.stopPropagation()
   if (tool !== 'select') return
   // 履歴は実際に動かしたときだけ残す。掴んだだけで Undo が積まれると使いにくい。
@@ -579,6 +593,7 @@ function startDrag(event: PointerEvent, nodeId: string, part: 'node' | 'in' | 'o
 
 function startUnderlayDrag(event: PointerEvent, mode: 'move' | 'scale') {
   if (!design.underlay) return
+  if (event.button !== LEFT_BUTTON) return
   event.stopPropagation()
   drag = { kind: 'underlay', origin: toWorld(event), base: { ...design.underlay }, mode, dirty: false }
   svg.setPointerCapture(event.pointerId)
@@ -644,7 +659,27 @@ function finishSketch() {
   refresh()
 }
 
+/** 画面を動かす操作を始める。道具に関係なく使えるようにしてある。 */
+function startPan(event: PointerEvent) {
+  drag = {
+    kind: 'pan',
+    startClient: { x: event.clientX, y: event.clientY },
+    startView: { x: view.x, y: view.y }
+  }
+  svg.setPointerCapture(event.pointerId)
+}
+
 svg.addEventListener('pointerdown', (event) => {
+  // ホイールクリックは、どの道具を使っていても画面移動。
+  // 線を描いている途中でも視点を動かせるようにするため（描きかけは消さない）。
+  if (event.button === MIDDLE_BUTTON) {
+    event.preventDefault()
+    startPan(event)
+    return
+  }
+  // 右クリックなどは道具の操作に使わない。
+  if (event.button !== LEFT_BUTTON) return
+
   const point = toWorld(event)
   const snapped = design.snap
     ? { x: snapValue(point.x, design.grid), y: snapValue(point.y, design.grid) }
@@ -692,8 +727,16 @@ svg.addEventListener('pointerdown', (event) => {
     if (select(null)) refresh()
   }
 
-  drag = { kind: 'pan', startClient: { x: event.clientX, y: event.clientY }, startView: { x: view.x, y: view.y } }
-  svg.setPointerCapture(event.pointerId)
+  startPan(event)
+})
+
+// ホイールクリックの既定動作（自動スクロール）を止める。
+// pointerdown を止めても互換の mousedown は既定動作を行うので、両方で押さえる。
+svg.addEventListener('mousedown', (event) => {
+  if (event.button === MIDDLE_BUTTON) event.preventDefault()
+})
+svg.addEventListener('auxclick', (event) => {
+  if (event.button === MIDDLE_BUTTON) event.preventDefault()
 })
 
 svg.addEventListener('dblclick', (event: MouseEvent) => {
@@ -1014,6 +1057,7 @@ document.querySelector('#new-design')!.addEventListener('click', () => {
   snapshot()
   design.outline = emptyOutline()
   design.details = []
+  design.underlay = null
   selection = null
   selectedDetailId = null
   fitView()
@@ -1071,7 +1115,7 @@ function renderInspector() {
         under.y = (bounds.minY + bounds.maxY) / 2 - under.height / 2
         refresh()
       }))
-      inspectorBox.append(button('下絵を外す', () => {
+      inspectorBox.append(button('下絵を削除', () => {
         snapshot()
         design.underlay = null
         refresh()
@@ -1423,6 +1467,7 @@ function refresh() {
   // 検査を先に走らせる。印は drawEditor が描くので、順番を逆にすると1回ぶん古い印が残る。
   const issues = inspect()
   drawEditor()
+  syncDropzone()
   renderProperties()
   renderInspector()
   renderIssues(issues)
@@ -1681,14 +1726,47 @@ imageInput.addEventListener('change', async () => {
   imageInput.value = ''
 })
 
-// キャンバスに直接ドロップしても読み込めるようにする。
-svg.addEventListener('dragover', (event) => { event.preventDefault() })
-svg.addEventListener('drop', async (event) => {
-  event.preventDefault()
-  const file = [...(event.dataTransfer?.files ?? [])].find((f) => f.type.startsWith('image/'))
-  if (!file) return
+/**
+ * 下絵タブで画像がまだ無いときだけ、ドロップできる場所だと分かるように出す。
+ * 何も無い画面では、ドロップできること自体が伝わらない。
+ */
+const dropzone = document.querySelector<HTMLButtonElement>('#dropzone')!
+dropzone.addEventListener('click', () => imageInput.click())
+
+function syncDropzone() {
+  dropzone.hidden = !(layer === 'underlay' && !design.underlay)
+}
+
+async function acceptDroppedImage(list: FileList | undefined) {
+  const file = [...(list ?? [])].find((f) => f.type.startsWith('image/'))
+  if (!file) {
+    showStatus('画像ファイルをドロップしてください。', true)
+    return
+  }
   try { await loadUnderlay(file) }
   catch (error) { showStatus(error instanceof Error ? error.message : '画像を読み込めませんでした。', true) }
+}
+
+// キャンバスのどこにドロップしても読み込めるようにする。
+const canvasWrap = document.querySelector<HTMLDivElement>('.canvas-wrap')!
+let dragDepth = 0
+
+canvasWrap.addEventListener('dragenter', (event) => {
+  event.preventDefault()
+  // 子要素をまたぐたびに enter/leave が来るので、深さを数えてちらつきを防ぐ。
+  dragDepth++
+  canvasWrap.classList.add('dragging')
+})
+canvasWrap.addEventListener('dragover', (event) => { event.preventDefault() })
+canvasWrap.addEventListener('dragleave', () => {
+  dragDepth = Math.max(0, dragDepth - 1)
+  if (!dragDepth) canvasWrap.classList.remove('dragging')
+})
+canvasWrap.addEventListener('drop', async (event) => {
+  event.preventDefault()
+  dragDepth = 0
+  canvasWrap.classList.remove('dragging')
+  await acceptDroppedImage(event.dataTransfer?.files)
 })
 
 const nameInput = document.querySelector<HTMLInputElement>('#project-name')!

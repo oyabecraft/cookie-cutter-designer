@@ -147,6 +147,26 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-size: 14px; }
 .tool.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
 .canvas-wrap { position: relative; flex: 1; min-height: 0; }
+
+/* 画像をドロップできる場所だと分かるように出す。下絵タブで画像が無いときだけ。 */
+.dropzone {
+  position: absolute; inset: 28px; margin: auto;
+  width: min(420px, 82%); height: min(230px, 62%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  border: 2.5px dashed #c9bbef; border-radius: 16px;
+  background: rgba(255, 255, 255, .82); color: #7c3aed;
+  font: inherit; cursor: pointer; transition: border-color .12s, background .12s;
+}
+.dropzone:hover { border-color: #7c3aed; background: #faf6ff; }
+.dropzone svg { width: 46px; height: 46px; opacity: .75; }
+.dropzone strong { font-size: 15px; font-weight: 700; }
+.dropzone span { font-size: 12px; color: var(--muted); }
+/* ファイルを運んできている間は、受け取れることをはっきり示す。 */
+.canvas-wrap.dragging .dropzone { border-color: #7c3aed; background: #f3ebff; }
+.canvas-wrap.dragging::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  border: 3px solid #7c3aed; border-radius: 6px; background: rgba(124, 58, 237, .06);
+}
 #editor-svg { width: 100%; height: 100%; display: block; touch-action: none; background: #fbfcfe; }
 .canvas-help {
   position: absolute; left: 10px; bottom: 8px; margin: 0;
