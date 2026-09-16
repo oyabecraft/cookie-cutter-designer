@@ -157,6 +157,8 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-size: 14px; }
   background: rgba(255, 255, 255, .82); color: #7c3aed;
   font: inherit; cursor: pointer; transition: border-color .12s, background .12s;
 }
+/* display を指定したので、hidden 属性が効くよう明示的に打ち消す。 */
+.dropzone[hidden] { display: none; }
 .dropzone:hover { border-color: #7c3aed; background: #faf6ff; }
 .dropzone svg { width: 46px; height: 46px; opacity: .75; }
 .dropzone strong { font-size: 15px; font-weight: 700; }
