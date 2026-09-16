@@ -657,8 +657,8 @@ function finishSketch() {
     selectedDetailId = detail.id
   }
   sketch = null
-  tool = 'select'
-  renderToolTabs()
+  // 道具は切り替えない。線も面も、続けてもう一本描けるようにするため。
+  // 選択に戻りたいときは選択の道具を押す。
   refresh()
 }
 
@@ -907,7 +907,8 @@ addEventListener('keydown', (event) => {
 
   if (event.key === 'Enter' && sketch) { event.preventDefault(); finishSketch(); return }
   if (event.key === 'Escape') {
-    if (sketch) { sketch = null; tool = 'select'; renderToolTabs(); refresh() }
+    // 取り消しても道具は変えない。描き直せるようにするため。
+    if (sketch) { sketch = null; refresh() }
     else if (select(null)) refresh()
     return
   }
